@@ -1,8 +1,19 @@
 // Runs @servicenow/cli directly (no snc binary or keychain profile) for CI.
 const {spawnSync} = require('node:child_process');
-const {join} = require('node:path');
+const {mkdtempSync, writeFileSync} = require('node:fs');
+const {tmpdir} = require('node:os');
+const {delimiter, join} = require('node:path');
 
 const CREDENTIAL_VARS = ['SN_HOST', 'SN_USERNAME', 'SN_PASSWORD'];
+const SNC_VERSION_JSON = '{"snc":"1.1.3"}';
+
+// The CLI only runs `snc version --output json`; answer it without the real binary.
+const createSncStub = () => {
+	const dir = mkdtempSync(join(tmpdir(), 'snc-stub-'));
+	writeFileSync(join(dir, 'snc'), `#!/bin/sh\necho '${SNC_VERSION_JSON}'\n`, {mode: 0o755});
+	writeFileSync(join(dir, 'snc.cmd'), `@echo ${SNC_VERSION_JSON}\r\n`);
+	return dir;
+};
 
 if (require.main === module) {
 	const missing = CREDENTIAL_VARS.filter(name => !process.env[name]);
@@ -15,10 +26,12 @@ if (require.main === module) {
 		paths: [process.env.NOW_CLI_HOME || process.cwd()]
 	});
 	const preload = file => `--require "${join(__dirname, file).replace(/\\/g, '/')}"`;
+	const pathKey = Object.keys(process.env).find(key => key.toUpperCase() === 'PATH') || 'PATH';
 	const result = spawnSync(process.execPath, [cli, ...process.argv.slice(2)], {
 		stdio: 'inherit',
 		env: {
 			...process.env,
+			[pathKey]: [createSncStub(), process.env[pathKey]].join(delimiter),
 			NOW_CLI_ENTRY: cli,
 			NODE_OPTIONS: [process.env.NODE_OPTIONS, preload('servicenow-cli.cjs'), preload('ci-now-cli.cjs')]
 				.filter(Boolean).join(' ')

@@ -12,6 +12,7 @@ permissions:
 env:
   NOW_CLI_VERSION: 30.2.0
   NOW_CLI_HOME: ${{ github.workspace }}/../now-cli
+  SN_HOST: https://servicenow.terra-aws.com
 
 jobs:
   build:
@@ -47,7 +48,6 @@ jobs:
     needs: build
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    environment: dev
     concurrency:
       group: servicenow-deploy-dev
       cancel-in-progress: false
@@ -67,6 +67,5 @@ jobs:
       - name: Deploy to ServiceNow
         run: npm run ci:deploy
         env:
-          SN_HOST: ${{ vars.SN_HOST }}
           SN_USERNAME: ${{ secrets.SN_USERNAME }}
           SN_PASSWORD: ${{ secrets.SN_PASSWORD }}
