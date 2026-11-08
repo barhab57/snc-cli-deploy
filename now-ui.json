@@ -1,0 +1,42 @@
+{
+  "components": {
+    "x-1234-sow-overview-preview": {
+      "innerComponents": [],
+      "uiBuilder": {
+        "associatedTypes": [
+          "global.core"
+        ],
+        "label": "SOW Overview",
+        "tileIcon": "./tile-icon/generic-tile-icon.svg",
+        "description": "Service Operations overview with work-mode filters, SLA breakdowns, and ticket drill-down.",
+        "category": "primitives"
+      }
+    },
+    "x-1234-sow-test-component": {
+      "innerComponents": [],
+      "uiBuilder": {
+        "associatedTypes": [
+          "global.core"
+        ],
+        "label": "SOW Code Test",
+        "tileIcon": "./tile-icon/generic-tile-icon.svg",
+        "description": "Simple code-based component used to test placement in Service Operations Workspace.",
+        "category": "primitives"
+      }
+    },
+    "x-1234-my-first-component": {
+      "innerComponents": [],
+      "uiBuilder": {
+        "associatedTypes": [
+          "global.core",
+          "global.landing-page"
+        ],
+        "label": "Incident Records",
+        "tileIcon": "./tile-icon/generic-tile-icon.svg",
+        "description": "Display incident records provided by a UI Builder data resource.",
+        "category": "primitives"
+      }
+    }
+  },
+  "scopeName": "x_1234_my_first"
+}

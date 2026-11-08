@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>SOW Overview Design Preview</title>
+	<style>
+		:root {
+			color-scheme: light;
+			font-family: "Segoe UI", sans-serif;
+			color: #192c35;
+			background: #f4f7f6;
+			font-synthesis: none;
+		}
+		* { box-sizing: border-box; }
+		body { margin: 0; padding: 32px; }
+		main { max-width: 1440px; margin: 0 auto; }
+		.overview-header, .queue-heading, .queue-actions, .footer, .pager {
+		display: flex; align-items: center; justify-content: space-between; gap: 16px;
+		}
+		.overview-header { margin-bottom: 22px; }
+		.eyebrow { margin: 0 0 5px; color: #147b78; font-size: 11px; font-weight: 700; }
+		h1, h2, p { margin-top: 0; }
+		h1 { margin-bottom: 0; font-size: 25px; font-weight: 650; }
+		.sample-label { margin-left: 10px; color: #946722; font-size: 11px; font-weight: 700; }
+		.filter { display: flex; align-items: center; gap: 9px; color: #63727a; font-size: 13px; }
+		select { min-width: 136px; padding: 9px 12px; border: 1px solid #bbc8c9; border-radius: 4px; background: #fff; color: #192c35; font: inherit; }
+		.categories { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid #dbe2e3; overflow-x: auto; }
+		.category { display: inline-flex; align-items: center; gap: 9px; flex: 0 0 auto; min-height: 46px; padding: 10px 13px; border: 0; border-bottom: 3px solid transparent; background: transparent; color: #475860; font: inherit; font-size: 12px; cursor: pointer; }
+		.category:hover, .category.active { color: #192c35; }
+		.category.active { border-bottom-color: #147b78; font-weight: 700; }
+		.count { min-width: 22px; padding: 3px 6px; border-radius: 999px; background: #e4ecea; color: #35554f; font-size: 11px; text-align: center; }
+		.queue { padding: 18px 20px 12px; border-top: 3px solid #147b78; background: #fff; }
+		.queue-heading { margin-bottom: 14px; }
+		h2 { margin-bottom: 4px; font-size: 18px; font-weight: 650; }
+		.summary { margin: 0; color: #63727a; font-size: 13px; }
+		.total { color: #63727a; font-size: 12px; white-space: nowrap; }
+		.total strong { margin-right: 4px; color: #192c35; font-size: 19px; }
+		button { font-family: inherit; }
+		.view-all { padding: 9px 11px; border: 1px solid #a9c5c1; border-radius: 4px; background: #fff; color: #147b78; font-size: 12px; font-weight: 700; cursor: pointer; }
+		.table { border-top: 1px solid #dbe2e3; }
+		.row { display: grid; grid-template-columns: minmax(145px, .7fr) minmax(130px, 1.6fr) minmax(40px, .12fr) minmax(150px, .7fr); align-items: center; gap: 16px; min-height: 50px; padding: 9px 8px; border-bottom: 1px solid #dbe2e3; font-size: 13px; }
+		.row.head { min-height: 38px; color: #63727a; font-size: 11px; font-weight: 700; }
+		.bar { height: 9px; border-radius: 999px; background: #e7edec; overflow: hidden; }
+		.bar-fill { display: block; height: 100%; border-radius: inherit; background: #147b78; }
+		.bar-fill.cyan { background: #24b5c9; }
+		.bar-fill.purple { background: #903cb8; }
+		.bar-fill.orange { background: #d77720; }
+		.empty-row { padding: 16px 8px; color: #63727a; font-size: 13px; }
+		.breakdown { width: 100%; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+		.breakdown:hover { background: #f2f6f5; }
+		.ticket-detail { padding: 18px 20px 12px; border-top: 3px solid #147b78; background: #fff; }
+		.ticket-header { display: grid; grid-template-columns: 1fr minmax(12rem, 2fr) 1fr; align-items: center; gap: 16px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #dbe2e3; }
+		.ticket-back, .ticket-tools button { border: 1px solid #bbc8c9; border-radius: 4px; background: #fff; color: #192c35; font: inherit; cursor: pointer; }
+		.ticket-back { justify-self: start; padding: 8px 11px; }
+		.ticket-title { text-align: center; }
+		.ticket-title h2 { margin: 0; font-size: 18px; }
+		.ticket-title p { margin: 4px 0 0; color: #63727a; font-size: 12px; }
+		.ticket-tools { display: flex; justify-self: end; gap: 6px; }
+		.ticket-tools button { width: 36px; height: 36px; font-size: 16px; }
+		.ticket-tools button[aria-pressed="true"] { border-color: #147b78; background: #e4efed; color: #147b78; }
+		.ticket-list { display: flex; flex-direction: column; }
+		.ticket-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 10px; }
+		.ticket { min-width: 0; padding: 12px; border-bottom: 1px solid #dbe2e3; background: #fff; }
+		.ticket-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; color: #63727a; font-size: 12px; }
+		.ticket-priority { padding: 3px 6px; background: #dcefed; color: #176b66; font-weight: 700; }
+		.ticket p { margin: 9px 0 0; font-size: 14px; }
+		.ticket-empty, .ticket-footer { color: #63727a; font-size: 12px; }
+		.ticket-empty { padding: 16px 0; }
+		.ticket-footer { padding-top: 12px; }
+		.breakdown { width: 100%; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+		.breakdown:hover { background: #f2f6f5; }
+		.ticket-detail { padding: 18px 20px 12px; border-top: 3px solid #147b78; background: #fff; }
+		.ticket-header { display: grid; grid-template-columns: 1fr minmax(12rem, 2fr) 1fr; align-items: center; gap: 16px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #dbe2e3; }
+		.ticket-back, .ticket-tools button { border: 1px solid #bbc8c9; border-radius: 4px; background: #fff; color: #192c35; font: inherit; cursor: pointer; }
+		.ticket-back { justify-self: start; padding: 8px 11px; }
+		.ticket-title { text-align: center; }
+		.ticket-title h2 { margin: 0; font-size: 18px; }
+		.ticket-title p { margin: 4px 0 0; color: #63727a; font-size: 12px; }
+		.ticket-tools { display: flex; justify-self: end; gap: 6px; }
+		.ticket-tools button { width: 36px; height: 36px; font-size: 16px; }
+		.ticket-tools button[aria-pressed="true"] { border-color: #147b78; background: #e4efed; color: #147b78; }
+		.ticket-list { display: flex; flex-direction: column; }
+		.ticket-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 10px; }
+		.ticket { min-width: 0; padding: 12px; border-bottom: 1px solid #dbe2e3; background: #fff; }
+		.ticket-meta { display: flex; align-items: center; gap: 10px; color: #63727a; font-size: 12px; }
+		.ticket-priority { padding: 3px 6px; background: #dcefed; color: #176b66; font-weight: 700; }
+		.ticket p { margin: 9px 0 0; font-size: 14px; }
+		.ticket-empty, .ticket-footer { color: #63727a; font-size: 12px; }
+		.ticket-empty { padding: 16px 0; }
+		.ticket-footer { padding-top: 12px; }
+		.footer { padding-top: 12px; color: #63727a; font-size: 12px; }
+		.pager button { width: 32px; height: 32px; border: 1px solid #c8d3d4; border-radius: 50%; background: #fff; color: #192c35; font-size: 16px; cursor: pointer; }
+		.pager span { min-width: 42px; text-align: center; }
+		button:focus-visible, select:focus-visible { outline: 3px solid #db9d43; outline-offset: 2px; }
+		@media (max-width: 760px) {
+			body { padding: 16px; }
+			.overview-header, .queue-heading { align-items: flex-start; }
+			.row { grid-template-columns: minmax(130px, 1fr) auto; gap: 6px 14px; }
+			.row.head span:nth-child(2) { display: none; }
+			.row:not(.head) .bar { grid-column: 1 / 2; grid-row: 2; }
+			.row:not(.head) span:nth-child(4) { grid-column: 1 / -1; grid-row: 3; }
+		}
+		@media (max-width: 480px) {
+			body { padding: 12px; }
+			.overview-header, .queue-heading { flex-direction: column; }
+			.queue-actions { width: 100%; }
+			.ticket-header { grid-template-columns: 1fr auto; }
+			.ticket-title { grid-row: 1; grid-column: 1 / -1; text-align: left; }
+		}
+	</style>
+</head>
+<body>
+	<main>
+		<div class="overview-view">
+		<header class="overview-header">
+			<div>
+				<p class="eyebrow">SERVICE OPERATIONS WORKSPACE <span class="sample-label">DESIGN PREVIEW</span></p>
+				<h1>Overview</h1>
+			</div>
+			<label class="filter"><span>Showing</span><select id="work-view" aria-label="Showing"><option selected>Your work</option><option>Your team's work</option></select></label>
+		</header>
+		<nav class="categories" aria-label="Work categories"></nav>
+		<section class="queue" aria-live="polite">
+			<header class="queue-heading">
+				<div>
+					<p class="eyebrow">WORK QUEUE</p>
+					<h2></h2>
+					<p class="summary"></p>
+				</div>
+				<div class="queue-actions">
+					<span class="total"></span>
+					<button class="view-all" type="button">View all <span aria-hidden="true">&#8594;</span></button>
+				</div>
+			</header>
+			<div class="table" role="table" aria-label="Work queue">
+				<div class="row head" role="row"><span>Breakdown</span><span>Distribution</span><span>Count</span><span>SLA</span></div>
+				<div class="rows"></div>
+			</div>
+			<footer class="footer"><span class="showing"></span><div class="pager"><button type="button" aria-label="Previous category">&#8592;</button><span></span><button type="button" aria-label="Next category">&#8594;</button></div></footer>
+		</section>
+		</div>
+		<section class="ticket-detail" aria-label="Ticket list" hidden></section>
+	</main>
+	<script>
+		const workViews = {
+			'Your work': [
+				{id:'my-incidents',title:'Incidents assigned to you',count:1,summary:'Your incidents, grouped by state and SLA.',breakdowns:[{label:'In Progress',count:1,sla:'2 to 7 days · 1',tone:'purple',tickets:[]}]},
+				{id:'my-catalog',title:'Catalog tasks assigned to you',count:null,summary:'Your catalog tasks, including SLA status.',breakdowns:[{label:'Assigned to you',count:null,sla:'Not visible in source',tone:'green',tickets:[]}]}
+			],
+			"Your team's work": [
+				{id:'unassigned-incidents',title:'Unassigned incidents',count:76,summary:'Unassigned incidents by priority, with SLA on each ticket.',breakdowns:[{label:'4 - Low',count:61,sla:'Not visible in source',tone:'cyan',tickets:[{number:'INC0011853',priority:'4 - Low',assignedTo:'Unassigned',sla:'Not visible',summary:'sdligdhsjf'},{number:'INC0011852',priority:'4 - Low',assignedTo:'Unassigned',sla:'Not visible',summary:'t'},{number:'INC0011851',priority:'4 - Low',assignedTo:'Unassigned',sla:'Not visible',summary:'t'}]},{label:'3 - Moderate',count:10,sla:'Not visible in source',tone:'purple',tickets:[]},{label:'2 - High',count:5,sla:'Not visible in source',tone:'orange',tickets:[]}]},
+				{id:'assigned-incidents',title:'Incidents assigned to your team',count:4,summary:'Team incidents by state; assignee and SLA appear in the ticket list.',breakdowns:[{label:'In Progress',count:4,sla:'See ticket list',tone:'purple',tickets:[]}]},
+				{id:'unassigned-catalog',title:'Unassigned catalog tasks',count:1,summary:'Unassigned catalog tasks with SLA status.',breakdowns:[{label:'Create a user …',count:1,sla:'Not visible in source',tone:'cyan',tickets:[]}]},
+				{id:'assigned-catalog',title:'Catalog tasks assigned to your team',count:1,summary:'Team catalog tasks by state; assignee and SLA appear in the ticket list.',breakdowns:[{label:'Open',count:1,sla:'See ticket list',tone:'green',tickets:[]}]},
+				{id:'approvals',title:'Request waiting for your approval',count:3,summary:'Requests awaiting approval with SLA status.',breakdowns:[{label:'Waiting for approval',count:3,sla:'Not visible in source',tone:'orange',tickets:[]}]}
+			]
+		};
+		let workView = 'Your work';
+		let activeIndex = 0;
+		let ticketLayout = 'grid';
+		const workViewSelector = document.querySelector('#work-view');
+		const categoryNav = document.querySelector('.categories');
+		const overviewView = document.querySelector('.overview-view');
+		const detailView = document.querySelector('.ticket-detail');
+		const renderTickets = (section, breakdown = null) => {
+			const tickets = breakdown ? breakdown.tickets : section.breakdowns.flatMap(item => item.tickets);
+			const count = breakdown ? breakdown.count : section.count;
+			const title = breakdown ? `${section.title} · ${breakdown.label}` : section.title;
+			const cards = tickets.map(ticket=>`<article class="ticket"><div class="ticket-meta"><span class="ticket-priority">${ticket.priority}</span><span>${ticket.number}</span><span>Assigned to: ${ticket.assignedTo || 'Not in preview'}</span><span>SLA: ${ticket.sla || 'Not in preview'}</span></div><p>${ticket.summary}</p></article>`).join('');
+			detailView.innerHTML=`<header class="ticket-header"><button class="ticket-back" type="button">← Overview</button><div class="ticket-title"><h2>${title}</h2><p>${count ?? '—'} tickets</p></div><div class="ticket-tools"><button type="button" data-layout="grid" aria-label="Grid view" aria-pressed="${ticketLayout==='grid'}">▦</button><button type="button" data-layout="list" aria-label="List view" aria-pressed="${ticketLayout==='list'}">☷</button></div></header><div class="${ticketLayout==='grid'?'ticket-grid':'ticket-list'}">${cards || '<p class="ticket-empty">No sample ticket details were supplied for this breakdown.</p>'}</div><footer class="ticket-footer">Showing ${tickets.length} sample records of ${count ?? '—'}; live data will load all matching tickets with assignee and SLA.</footer>`;
+			overviewView.hidden=true;
+			detailView.hidden=false;
+			detailView.querySelector('.ticket-back').addEventListener('click',()=>{detailView.hidden=true;overviewView.hidden=false;});
+			detailView.querySelectorAll('[data-layout]').forEach(button=>button.addEventListener('click',()=>{ticketLayout=button.dataset.layout;renderTickets(section,breakdown);}));
+		};
+		const render = () => {
+			const sections = workViews[workView];
+			const section = sections[activeIndex];
+			categoryNav.innerHTML = sections.map((item,index)=>`<button class="category ${index===activeIndex?'active':''}" type="button" role="tab" aria-selected="${index===activeIndex}" data-index="${index}"><span>${item.title}</span><span class="count">${item.count ?? '—'}</span></button>`).join('');
+			categoryNav.querySelectorAll('button').forEach(button=>button.addEventListener('click',()=>{activeIndex=Number(button.dataset.index);render();}));
+			document.querySelector('h2').textContent=section.title;
+			document.querySelector('.summary').textContent=section.summary;
+			document.querySelector('.total').innerHTML=`<strong>${section.count ?? '—'}</strong> items`;
+			document.querySelector('.showing').textContent=section.count === null ? 'Count not visible in source' : `${section.breakdowns.length} breakdowns · ${section.count} total`;
+			document.querySelector('.pager span').textContent=`${activeIndex+1} / ${sections.length}`;
+			document.querySelector('.table').setAttribute('aria-label',section.title);
+			const rows=section.breakdowns.map((row,index)=>{const share=section.count?Math.round(row.count/section.count*100):0;return `<button class="row breakdown" type="button" data-breakdown="${index}" aria-label="Show ${row.count ?? 'unknown'} tickets: ${row.label}"><span>${row.label}</span><span class="bar" aria-hidden="true"><span class="bar-fill ${row.tone}" style="width:${share}%"></span></span><strong>${row.count ?? '—'}</strong><span>${row.sla || 'Not visible'}</span></button>`;}).join('');
+			document.querySelector('.rows').innerHTML=rows || '<div class="empty-row">No breakdown values visible in the screenshot.</div>';
+			document.querySelectorAll('[data-breakdown]').forEach(button=>button.addEventListener('click',()=>renderTickets(section,section.breakdowns[Number(button.dataset.breakdown)])));
+		};
+		workViewSelector.addEventListener('change',()=>{workView=workViewSelector.value;activeIndex=0;detailView.hidden=true;overviewView.hidden=false;render();});
+		document.querySelector('[aria-label="Previous category"]').addEventListener('click',()=>{const sections=workViews[workView];activeIndex=(activeIndex+sections.length-1)%sections.length;render();});
+		document.querySelector('[aria-label="Next category"]').addEventListener('click',()=>{const sections=workViews[workView];activeIndex=(activeIndex+1)%sections.length;render();});
+		document.querySelector('.view-all').addEventListener('click',()=>renderTickets(workViews[workView][activeIndex]));
+		render();
+	</script>
+</body>
+</html>

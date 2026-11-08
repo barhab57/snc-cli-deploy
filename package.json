@@ -1,0 +1,34 @@
+{
+  "name": "@myorg/my-first-component",
+  "version": "0.0.2",
+  "private": false,
+  "description": "My custom UI Builder component",
+  "keywords": [
+    "ServiceNow",
+    "Next Experience UI Component",
+    "@myorg/my-first-component"
+  ],
+  "readme": "./README.md",
+  "engines": {
+    "node": ">=22"
+  },
+  "module": "src/index.js",
+  "scripts": {
+    "deploy": "node scripts/servicenow-cli.cjs ui-component deploy --profile my-profile",
+    "develop:sow-test": "node scripts/servicenow-cli.cjs ui-component develop --entry example/sow-test-element.js --open --profile my-profile",
+    "develop:sow-overview": "node scripts/servicenow-cli.cjs ui-component develop --entry example/sow-overview-preview.js --open --profile my-profile",
+    "package:update-set": "node scripts/servicenow-cli.cjs ui-component generate-update-set --offline --profile my-profile",
+    "ci:build": "node scripts/ci-now-cli.cjs generate-update-set --offline",
+    "ci:deploy": "node scripts/ci-now-cli.cjs deploy"
+  },
+  "dependencies": {
+    "@servicenow/ui-core": "24.1.1",
+    "@servicenow/ui-renderer-snabbdom": "24.1.1",
+    "@servicenow/sass-kit": "latest"
+  },
+  "devDependencies": {
+    "sass": "1.53.0",
+    "@babel/runtime": "7.28.3",
+    "ajv": "6.12.6"
+  }
+}

@@ -1,0 +1,72 @@
+name: ServiceNow component
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  NOW_CLI_VERSION: 30.2.0
+  NOW_CLI_HOME: ${{ github.workspace }}/../now-cli
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install ServiceNow UI component CLI
+        run: npm install --prefix "$NOW_CLI_HOME" --no-save --no-audit --no-fund "@servicenow/cli@$NOW_CLI_VERSION"
+
+      # Offline build needs placeholder connection values only.
+      - name: Build update set
+        run: npm run ci:build
+        env:
+          SN_HOST: https://offline.invalid
+          SN_USERNAME: offline
+          SN_PASSWORD: offline
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: update-set
+          path: .now-cli/
+          if-no-files-found: error
+
+  deploy:
+    needs: build
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: dev
+    concurrency:
+      group: servicenow-deploy-dev
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install ServiceNow UI component CLI
+        run: npm install --prefix "$NOW_CLI_HOME" --no-save --no-audit --no-fund "@servicenow/cli@$NOW_CLI_VERSION"
+
+      - name: Deploy to ServiceNow
+        run: npm run ci:deploy
+        env:
+          SN_HOST: ${{ vars.SN_HOST }}
+          SN_USERNAME: ${{ secrets.SN_USERNAME }}
+          SN_PASSWORD: ${{ secrets.SN_PASSWORD }}

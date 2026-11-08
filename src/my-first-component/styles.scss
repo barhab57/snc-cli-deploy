@@ -1,0 +1,97 @@
+@import '@servicenow/sass-kit/host';
+
+:host {
+	display: block;
+	color: #202a33;
+	font-family: inherit;
+}
+
+.incident-list {
+	border: 1px solid #c9d2d8;
+	background: #ffffff;
+}
+
+.cicd-banner {
+	margin: 0;
+	padding: 1rem;
+	color: #d00000;
+	font-size: 2.5rem;
+	font-weight: 900;
+	text-align: center;
+}
+
+.incident-list__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 0.875rem 1rem;
+	border-top: 4px solid #197a78;
+	border-bottom: 1px solid #e1e7ea;
+}
+
+.incident-list__title {
+	margin: 0;
+	font-size: 1.125rem;
+}
+
+.incident-list__count {
+	color: #53616a;
+	font-size: 0.8125rem;
+	font-weight: 700;
+}
+
+.incident-list__scroll {
+	overflow-x: auto;
+}
+
+.incident-list__table {
+	width: 100%;
+	min-width: 54rem;
+	border-collapse: collapse;
+	text-align: left;
+	font-size: 0.875rem;
+}
+
+.incident-list__table th,
+.incident-list__table td {
+	padding: 0.75rem 1rem;
+	border-bottom: 1px solid #e1e7ea;
+	vertical-align: top;
+}
+
+.incident-list__table th {
+	background: #f2f5f6;
+	color: #35444d;
+	font-weight: 700;
+}
+
+.incident-list__row:last-child td {
+	border-bottom: 0;
+}
+
+.incident-list__row--selected {
+	background: #e9f4f3;
+}
+
+.incident-list__record-link {
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: #176e6d;
+	font: inherit;
+	font-weight: 700;
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+.incident-list__record-link:focus-visible {
+	outline: 3px solid #f0bd4f;
+	outline-offset: 2px;
+}
+
+.incident-list__empty {
+	padding: 2rem 1rem;
+	color: #53616a;
+	text-align: center;
+}
