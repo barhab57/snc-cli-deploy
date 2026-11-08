@@ -28,7 +28,8 @@ if (require.main === module) {
 	const preload = file => `--require "${join(__dirname, file).replace(/\\/g, '/')}"`;
 	const pathKey = Object.keys(process.env).find(key => key.toUpperCase() === 'PATH') || 'PATH';
 	const result = spawnSync(process.execPath, [cli, ...process.argv.slice(2)], {
-		stdio: 'inherit',
+		stdio: ['inherit', 'pipe', 'pipe'],
+		maxBuffer: 256 * 1024 * 1024,
 		env: {
 			...process.env,
 			[pathKey]: [createSncStub(), process.env[pathKey]].join(delimiter),
@@ -38,7 +39,11 @@ if (require.main === module) {
 		}
 	});
 	if (result.error) console.error(result.error.message);
-	process.exitCode = result.status === null ? 1 : result.status;
+	process.stdout.write(result.stdout || '');
+	process.stderr.write(result.stderr || '');
+	// The CLI logs deploy failures but still exits 0.
+	const failed = /Failed to deploy|Unable to deploy/.test(`${result.stdout}${result.stderr}`);
+	process.exitCode = result.status === null || failed ? 1 : result.status;
 } else if (process.argv[1] === process.env.NOW_CLI_ENTRY) {
 	// Injected in-process so the password never appears on a command line.
 	process.argv.push(

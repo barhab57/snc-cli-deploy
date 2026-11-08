@@ -65,6 +65,18 @@ jobs:
       - name: Install ServiceNow UI component CLI
         run: npm install --prefix "$NOW_CLI_HOME" --no-save --no-audit --no-fund "@servicenow/cli@$NOW_CLI_VERSION"
 
+      - name: Check instance access from runner
+        env:
+          SN_USERNAME: ${{ secrets.SN_USERNAME }}
+          SN_PASSWORD: ${{ secrets.SN_PASSWORD }}
+        run: |
+          url="$SN_HOST/api/now/table/sys_user?sysparm_limit=1&sysparm_fields=sys_id"
+          probe() { code=$(curl -sS -o body.txt -w '%{http_code}' "$@" "$url"); echo "HTTP $code: $(head -c 200 body.txt)"; }
+          echo "Runner IP: $(curl -sS https://api.ipify.org)"
+          echo '--- no auth'; probe
+          echo '--- basic auth'; probe -u "$SN_USERNAME:$SN_PASSWORD"
+          echo '--- basic auth + GET body'; probe -u "$SN_USERNAME:$SN_PASSWORD" -X GET -H 'Content-Type: application/json' -d '{}'
+
       - name: Deploy to ServiceNow
         run: npm run ci:deploy
         env:
